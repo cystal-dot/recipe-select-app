@@ -41,7 +41,11 @@ const Home = () => {
         <div>
             <h1>料理セレクトアプリ</h1>
             <RegisterForm recipeToEdit={recipeToEdit} onCancel={handleCancelEdit} refreshRecipes={refreshRecipes} />
-            <RecipeList recipes={recipes} onEdit={handleEdit} onDelete={handleDelete} />
+            <RecipeList 
+                recipes={recipes} 
+                onEdit={(recipe, index) => handleEdit(recipe, index)} 
+                onDelete={(index) => handleDelete(index)}
+            />
         </div>
     );
 };

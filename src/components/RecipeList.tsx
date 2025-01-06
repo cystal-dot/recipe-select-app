@@ -1,5 +1,4 @@
-// components/RecipeList.tsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface Recipe {
     name: string;
@@ -7,46 +6,64 @@ interface Recipe {
     ingredients: string[];
 }
 
-const RecipeList = ({ recipes, onEdit, onDelete }: { recipes: Recipe[]; onEdit: (recipe: Recipe, index: number) => void; onDelete: (index: number) => void }) => {
+interface RecipeListProps {
+    recipes: Recipe[];
+    onEdit: (recipe: Recipe, index: number) => void;
+    onDelete: (index: number) => void;
+}
+
+const RecipeList: React.FC<RecipeListProps> = ({ recipes, onEdit, onDelete }) => {
     const [randomRecipes, setRandomRecipes] = useState<Recipe[]>([]);
 
+    useEffect(() => {
+        // レシピが変更されたときにランダムレシピを取得
+        getRandomRecipes();
+    }, [recipes]);
+
     const getRandomRecipes = () => {
-        const storedRecipes: Recipe[] = JSON.parse(localStorage.getItem('recipes') || '[]');
-        const randomRecipes: Recipe[] = [];
-        while (randomRecipes.length < 7 && storedRecipes.length > 0) {
-            const randomIndex = Math.floor(Math.random() * storedRecipes.length);
-            randomRecipes.push(storedRecipes[randomIndex]);
-            storedRecipes.splice(randomIndex, 1);
+        const shuffledRecipes = [...recipes];
+        for (let i = shuffledRecipes.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffledRecipes[i], shuffledRecipes[j]] = [shuffledRecipes[j], shuffledRecipes[i]];
         }
-        setRandomRecipes(randomRecipes);
+        // ランダムに最大7つのレシピを取得
+        setRandomRecipes(shuffledRecipes.slice(0, 7));
     };
 
     return (
-        <div>
+        <div className="recipe-list">
             <h2>レシピ一覧</h2>
-            <ul>
-                {recipes.length > 0 ? (
-                    recipes.map((recipe, index) => (
-                        <li key={index}>
-                            {recipe.name} - {recipe.category} - {recipe.ingredients.join(', ')}
-                            <button onClick={() => onEdit(recipe, index)}>更新</button>
-                            <button onClick={() => onDelete(index)}>削除</button>
+            {recipes.length > 0 ? (
+                <ul>
+                    {recipes.map((recipe, index) => (
+                        <li key={index} className="recipe-item">
+                            <h3>{recipe.name}</h3>
+                            <p><strong>カテゴリー:</strong> {recipe.category}</p>
+                            <p><strong>食材:</strong> {recipe.ingredients.join(', ')}</p>
+                            <div className="recipe-actions">
+                                <button onClick={() => onEdit(recipe, index)}>更新</button>
+                                <button onClick={() => onDelete(index)}>削除</button>
+                            </div>
                         </li>
-                    ))
-                ) : (
-                    <li>レシピがありません。</li>
-                )}
-            </ul>
+                    ))}
+                </ul>
+            ) : (
+                <p>レシピがありません。</p>
+            )}
 
             <h2>ランダムレシピ取得</h2>
             <button onClick={getRandomRecipes}>ランダムレシピ取得</button>
-            <ul>
-                {randomRecipes.map((recipe, index) => (
-                    <li key={index}>
-                        {recipe.name} - {recipe.category} - {recipe.ingredients.join(', ')}
-                    </li>
-                ))}
-            </ul>
+            {randomRecipes.length > 0 && (
+                <ul>
+                    {randomRecipes.map((recipe, index) => (
+                        <li key={index} className="random-recipe-item">
+                            <h3>{recipe.name}</h3>
+                            <p><strong>カテゴリー:</strong> {recipe.category}</p>
+                            <p><strong>食材:</strong> {recipe.ingredients.join(', ')}</p>
+                        </li>
+                    ))}
+                </ul>
+            )}
         </div>
     );
 };
