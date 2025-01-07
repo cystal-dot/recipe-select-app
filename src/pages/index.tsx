@@ -1,50 +1,76 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import RegisterForm from '../components/RegisterForm';
 import RecipeList from '../components/RecipeList';
+import RandomRecipeSelector from '../components/RandomRecipeSelector';
+import { supabase } from '../utils/supabaseClient';
 
 interface Recipe {
     name: string;
     category: string;
     ingredients: string[];
-    index?: number;
+    id?: number;
 }
 
 const Home = () => {
     const [recipes, setRecipes] = useState<Recipe[]>([]);
     const [recipeToEdit, setRecipeToEdit] = useState<Recipe | null>(null);
+    const [randomRecipes, setRandomRecipes] = useState<Recipe[]>([]);
 
-    useEffect(() => {
-        const storedRecipes = JSON.parse(localStorage.getItem('recipes') || '[]');
-        setRecipes(storedRecipes);
+    const fetchRecipes = useCallback(async () => {
+        const { data, error } = await supabase.from('recipes').select('*');
+        if (error) {
+            console.error('Error fetching recipes:', error);
+            return;
+        }
+        setRecipes(data.reverse());
+        updateRandomRecipes(data);
     }, []);
 
-    const handleEdit = (recipe: Recipe, index: number) => {
-        setRecipeToEdit({ ...recipe, index });
+    useEffect(() => {
+        fetchRecipes();
+    }, [fetchRecipes]);
+
+    const updateRandomRecipes = (allRecipes: Recipe[]) => {
+        const shuffledRecipes = [...allRecipes].sort(() => Math.random() - 0.5);
+        setRandomRecipes(shuffledRecipes.slice(0, 7));
+    };
+
+    const handleEdit = (recipe: Recipe) => {
+        setRecipeToEdit(recipe);
     };
 
     const handleCancelEdit = () => {
         setRecipeToEdit(null);
     };
 
-    const handleDelete = (index: number) => {
-        const updatedRecipes = recipes.filter((_, i) => i !== index);
-        setRecipes(updatedRecipes);
-        localStorage.setItem('recipes', JSON.stringify(updatedRecipes));
+    const handleDelete = async (id: number) => {
+        const { error } = await supabase.from('recipes').delete().eq('id', id);
+        if (error) {
+            console.error('Error deleting recipe:', error);
+        } else {
+            const updatedRecipes = recipes.filter(recipe => recipe.id !== id);
+            setRecipes(updatedRecipes);
+            updateRandomRecipes(updatedRecipes);
+        }
     };
 
-    const refreshRecipes = () => {
-        const storedRecipes = JSON.parse(localStorage.getItem('recipes') || '[]');
-        setRecipes(storedRecipes);
+    const refreshRecipes = async () => {
+        await fetchRecipes();
     };
 
     return (
         <div>
-            <h1>料理セレクトアプリ</h1>
+            <h1>ご飯を考えてもらおう！！</h1>
             <RegisterForm recipeToEdit={recipeToEdit} onCancel={handleCancelEdit} refreshRecipes={refreshRecipes} />
             <RecipeList 
                 recipes={recipes} 
-                onEdit={(recipe, index) => handleEdit(recipe, index)} 
-                onDelete={(index) => handleDelete(index)}
+                onEdit={handleEdit} 
+                onDelete={handleDelete}
+                getRandomRecipes={() => updateRandomRecipes(recipes)}
+            />
+            <RandomRecipeSelector 
+                onSelectRandomRecipes={() => updateRandomRecipes(recipes)} 
+                randomRecipes={randomRecipes} 
             />
         </div>
     );
