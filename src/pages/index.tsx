@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from 'react';
 import RegisterForm from '../components/RegisterForm';
 import RecipeList from '../components/RecipeList';
 import RandomRecipeSelector from '../components/RandomRecipeSelector';
-import { supabase } from '../utils/supabaseClient';
 
 interface Recipe {
     name: string;
@@ -17,11 +16,8 @@ const Home = () => {
     const [randomRecipes, setRandomRecipes] = useState<Recipe[]>([]);
 
     const fetchRecipes = useCallback(async () => {
-        const { data, error } = await supabase.from('recipes').select('*');
-        if (error) {
-            console.error('Error fetching recipes:', error);
-            return;
-        }
+        const response = await fetch('/api/recipes');
+        const data = await response.json();
         setRecipes(data.reverse());
         updateRandomRecipes(data);
     }, []);
@@ -44,13 +40,13 @@ const Home = () => {
     };
 
     const handleDelete = async (id: number) => {
-        const { error } = await supabase.from('recipes').delete().eq('id', id);
-        if (error) {
-            console.error('Error deleting recipe:', error);
-        } else {
+        const response = await fetch(`/api/recipes/${id}`, { method: 'DELETE' });
+        if (response.ok) {
             const updatedRecipes = recipes.filter(recipe => recipe.id !== id);
             setRecipes(updatedRecipes);
             updateRandomRecipes(updatedRecipes);
+        } else {
+            console.error('Error deleting recipe');
         }
     };
 

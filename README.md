@@ -1,9 +1,10 @@
 リンク：https://recipe-select-app.vercel.app/
 
-supabaseのキーは`.env`に格納  
+ローカルで起動する場合キーは`.env.local`に入れる。  
+本番ではvercelのenvで管理。  
 ```
-NEXT_PUBLIC_SUPABASE_URL={KEY}
-NEXT_PUBLIC_SUPABASE_ANON_KEY={KEY}
+SUPABASE_URL={}
+SUPABASE_SERVICE_ROLE_KEY={}
 ```
 
 テーブル

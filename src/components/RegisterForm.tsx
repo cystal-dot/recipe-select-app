@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { categories } from '../data/categories';
 import Autosuggest from 'react-autosuggest';
-import { supabase } from '../utils/supabaseClient';
 
 interface Recipe {
 	name: string;
@@ -30,12 +29,9 @@ const RegisterForm = ({ recipeToEdit, onCancel, refreshRecipes }: { recipeToEdit
 
 	useEffect(() => {
 		const fetchRecipes = async () => {
-			const { data, error } = await supabase.from('recipes').select('*');
-			if (error) {
-				console.error('Error fetching recipes:', error);
-				return [];
-			}
-			setAllRecipes(data.reverse()); // 逆順で保存
+			const response = await fetch('/api/recipes');
+			const data = await response.json();
+			setAllRecipes(data.reverse());
 		};
 
 		fetchRecipes();
@@ -84,33 +80,25 @@ const RegisterForm = ({ recipeToEdit, onCancel, refreshRecipes }: { recipeToEdit
 			return;
 		}
 
-		if (recipeToEdit) {
-			const { error } = await supabase
-				.from('recipes')
-				.update(recipe)
-				.eq('id', recipeToEdit.id);
-			if (error) {
-				console.error('Error updating recipe:', error);
-			} else {
-				refreshRecipes();
-				setSuccessMessage('更新できました！');
-				setTimeout(() => setSuccessMessage(null), 3000);
-				resetForm();
-				window.scrollTo(0, 0);
-			}
+		const method = recipeToEdit ? 'PUT' : 'POST';
+		const endpoint = recipeToEdit ? `/api/recipes/${recipeToEdit.id}` : '/api/recipes';
+
+		const response = await fetch(endpoint, {
+			method,
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(recipe),
+		});
+
+		if (response.ok) {
+			refreshRecipes();
+			setSuccessMessage(recipeToEdit ? '更新できました！' : '登録できました！');
+			setTimeout(() => setSuccessMessage(null), 3000);
+			resetForm();
+			window.scrollTo(0, 0);
 		} else {
-			const { error } = await supabase
-				.from('recipes')
-				.insert([recipe]);
-			if (error) {
-				console.error('Error adding recipe:', error);
-			} else {
-				refreshRecipes();
-				setSuccessMessage('登録できました！');
-				setTimeout(() => setSuccessMessage(null), 3000);
-				resetForm();
-				window.scrollTo(0, 0);
-			}
+			console.error('Error submitting recipe');
 		}
 		onCancel();
 	};
