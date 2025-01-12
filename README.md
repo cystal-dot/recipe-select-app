@@ -16,8 +16,7 @@
 - ランダムな献立の提案（1週間分）
 
 ## 技術スタック
-- フロントエンド: Next.js
-- バックエンド: Supabase
+- フロントエンド、バックエンド: Next.js
 - デプロイ: Vercel
 - データベース: PostgreSQL (Supabase)
 
