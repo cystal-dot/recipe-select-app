@@ -1,3 +1,4 @@
+import React from 'react';
 import { useState, useEffect } from 'react';
 
 interface Recipe {
@@ -21,6 +22,7 @@ const RecipeList: React.FC<RecipeListProps> = ({ recipes, onEdit, onDelete, getR
             // レシピが存在する場合のみランダムレシピを取得
             getRandomRecipes();
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [recipes.length]);
 
     const toggleRecipeList = () => {

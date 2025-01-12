@@ -1,7 +1,9 @@
+import React from 'react';
 import { useState, useEffect, useCallback } from 'react';
 import RegisterForm from '../components/RegisterForm';
 import RecipeList from '../components/RecipeList';
 import RandomRecipeSelector from '../components/RandomRecipeSelector';
+import { RANDOM_RECIPES_NUM } from '../common/consts';
 
 interface Recipe {
     name: string;
@@ -27,8 +29,9 @@ const Home = () => {
     }, [fetchRecipes]);
 
     const updateRandomRecipes = (allRecipes: Recipe[]) => {
+        // eslint-disable-next-line no-magic-numbers
         const shuffledRecipes = [...allRecipes].sort(() => Math.random() - 0.5);
-        setRandomRecipes(shuffledRecipes.slice(0, 7));
+        setRandomRecipes(shuffledRecipes.slice(0, RANDOM_RECIPES_NUM));
     };
 
     const handleEdit = (recipe: Recipe) => {
@@ -46,6 +49,7 @@ const Home = () => {
             setRecipes(updatedRecipes);
             updateRandomRecipes(updatedRecipes);
         } else {
+            // eslint-disable-next-line no-console
             console.error('Error deleting recipe');
         }
     };
