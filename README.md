@@ -1,4 +1,4 @@
-リンク：https://recipe-select-app.vercel.app/
+
 
 ローカルで起動する場合キーは`.env.local`に入れる。  
 本番ではvercelのenvで管理。  
