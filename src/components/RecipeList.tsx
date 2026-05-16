@@ -5,12 +5,13 @@ interface Recipe {
     name: string;
     category: string;
     ingredients: string[];
+    id?: number;
 }
 
 interface RecipeListProps {
     recipes: Recipe[];
     onEdit: (recipe: Recipe, index: number) => void;
-    onDelete: (index: number) => void;
+    onDelete: (id: number) => void;
     getRandomRecipes: () => void;
 }
 
@@ -29,6 +30,11 @@ const RecipeList: React.FC<RecipeListProps> = ({ recipes, onEdit, onDelete, getR
         setShowRecipeList(prev => !prev);
     };
 
+    const handleDelete = (id?: number) => {
+        if (id === undefined) return;
+        onDelete(id);
+    };
+
     return (
         <div className="recipe-list">
             <button onClick={toggleRecipeList}>
@@ -39,7 +45,7 @@ const RecipeList: React.FC<RecipeListProps> = ({ recipes, onEdit, onDelete, getR
                     <h2>レシピ一覧</h2>
                     <ul>
                         {recipes.map((recipe, index) => (
-                            <li key={index} className="recipe-item">
+                            <li key={recipe.id ?? index} className="recipe-item">
                                 <h3>{recipe.name}</h3>
                                 <p><strong>カテゴリー:</strong> {recipe.category}</p>
                                 <p><strong>食材:</strong> {recipe.ingredients.join(', ')}</p>
@@ -48,7 +54,7 @@ const RecipeList: React.FC<RecipeListProps> = ({ recipes, onEdit, onDelete, getR
                                         window.scrollTo(0, 0);
                                         onEdit(recipe, index);
                                     }}>更新</button>
-                                    <button onClick={() => onDelete(index)}>削除</button>
+                                    <button onClick={() => handleDelete(recipe.id)}>削除</button>
                                 </div>
                             </li>
                         ))}
