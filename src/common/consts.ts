@@ -1,4 +1,5 @@
 export const TIMEOUT_SECONDS = 30;
+export const MILLISECONDS_PER_SECOND = 1000;
 export const STATUS_CODES = {
     OK: 200,
     INTERNAL_SERVER_ERROR: 500,

@@ -2,7 +2,7 @@ import React from 'react';
 import { useEffect, useState } from 'react';
 import { categories } from '../data/categories';
 import Autosuggest from 'react-autosuggest';
-import { TIMEOUT_SECONDS, INGREDIENTS_NUM } from '../common/consts';
+import { TIMEOUT_SECONDS, INGREDIENTS_NUM, MILLISECONDS_PER_SECOND } from '../common/consts';
 
 interface Recipe {
 	name: string;
@@ -96,7 +96,7 @@ const RegisterForm = ({ recipeToEdit, onCancel, refreshRecipes }: { recipeToEdit
         if (response.ok) {
             refreshRecipes();
             setSuccessMessage(recipeToEdit ? '更新できました！' : '登録できました！');
-            setTimeout(() => setSuccessMessage(null), TIMEOUT_SECONDS);
+            setTimeout(() => setSuccessMessage(null), TIMEOUT_SECONDS * MILLISECONDS_PER_SECOND);
             resetForm();
             window.scrollTo(0, 0);
         } else {
